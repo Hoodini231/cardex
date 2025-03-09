@@ -20,6 +20,15 @@
 # production
 /build
 
+# Ignore compiled JS files from TypeScript
+*.js
+*.js.map
+*.d.ts
+
+# Ignore node_modules folder
+node_modules/
+
+
 # misc
 .DS_Store
 *.pem
