@@ -1,4 +1,4 @@
-# CardeDex - Centralized Pokemon TCG collecting platform
+# [In-progress] CardeDex - Centralized Pokemon TCG collecting platform
 
 PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's. The platform integrates organizing portfolios, warehouse for pokemon card data, price monitoring, data analytics, and AI-driven insights** to increase user agency and decision-making.
 
@@ -40,7 +40,7 @@ PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's
 ### 2️⃣ **Price monitoring**
 - **Web scraping** tools are used to monitor multiple websites for certain cards or products and will update every 30 minutes for API request optimization.
 
-- ### 3️⃣ **Price analytics for purchase decisions**
+### 3️⃣ **Price analytics for purchase decisions**
 - **Statistical formulas** to gauge expected returns of specific goods depending on current market price and card set.
 - **Risk analysis** to provide a gauge of how much risk the user is willing to take and when a price point is too high.
 
