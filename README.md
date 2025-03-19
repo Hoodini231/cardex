@@ -46,7 +46,22 @@ PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's
 - **Model training** Identify keep topics and regions to ingest data in which can provide a relationship into speculating card prices.
 ---
 
-## 🛠 Installation
+## Architecture
+![image](https://github.com/user-attachments/assets/75195040-b603-48e3-9c47-210808068006)
+### Key processes
+- Per set release quarterly job
+  - Updates the current set list every quarter for new sets.
+- Price scraping every 15 minutes
+  - Cache's the top 10 most popular set prices.
+  - Cache's trivial ROI calculation for the most popular goods.
+  - Updates price db.
+- ROI calculation
+  - Uses probability and statistical equations to calculate ROI.
+  - It grabs the risk and emotional value of the user via forms or NLP sentiment analysis.
+  - Adjust trivial ROI and create an acceptable loss limit.
+  - Uses Prospect and expected utility theory.
+  - Check reddis cache if user params are the same to avoid overhead on risk and utility re-calculation.
+
 
 ### 1️⃣ Clone the Repository
 ```sh
