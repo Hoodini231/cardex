@@ -36,7 +36,8 @@ PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's
 - **Integration with price monitoring** to make better insights into whether a specific booster pack or box is worth a certain price depending on the Chase card's prices.
 
 ### 2️⃣ **Price monitoring**
-- **Web scraping** tools are used to monitor multiple websites for certain cards or products and will update every 30 minutes for API request optimization.
+- **Web scraping** tools are used to monitor multiple websites for certain cards or products and will update every 15 minutes for API request optimization.
+  - Why every 15 minutes? this is because Pokemon cards generally do not have high volatility and would optimise API fetch calls allowing much faster rendering with less overhead.
 
 ### 3️⃣ **Price analytics for purchase decisions**
 - **Statistical formulas** to gauge expected returns of specific goods depending on current market price and card set.
