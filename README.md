@@ -14,8 +14,6 @@ PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's
 
 - [Tech Stack](#tech-stack)
 - [Features](#features)
-- [AI and Data Analytics](#ai-and-data-analytics)
-- [Installation](#installation)
 - [User Guide](#user-guide)
 - [Architecture](#architecture)
 - [Graphic Examples](#graphic-examples)
