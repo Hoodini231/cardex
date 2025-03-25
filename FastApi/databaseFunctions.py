@@ -60,6 +60,9 @@ def get_trivial_roi(good: str, set: str) -> dict:
     return trivial_roi
 
 async def get_rarity_prices(rarity: str, set_name: str) -> float:
+    #Trivialize energy
+    if "Energy" in rarity:
+        return 0.50
     set_card_prices = await prices_db.find_one({"name": set_name})
     if not set_card_prices or "cardPrices" not in set_card_prices:
         return 0
@@ -77,7 +80,6 @@ async def get_rarity_prices(rarity: str, set_name: str) -> float:
             price = float(price_str)
             total_price += price
             count += 1
-
     return total_price / count if count else 0
 
 

@@ -21,6 +21,7 @@ async def calculate_expected_value_for_card_slot(rarities: list, set: str):
         for rarity in rarities:
             # prob of rarity being pulled in this slot * expected value of rarity
             expected_value_output += pullrates[rarity] * (await calculate_expected_value_for_rarity(rarity, set))
+        print("Exepcted value for slot: ", expected_value_output)
         return expected_value_output
     else:
         return 0

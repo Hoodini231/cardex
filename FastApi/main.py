@@ -1,7 +1,7 @@
 import logging
 
 from fastapi import FastAPI, Query
-from priceScraping import get_price_charting_data, update_prices_for_set, price_scrape
+from priceScraping import get_price_charting_data, price_scrape
 from fastapi.middleware.cors import CORSMiddleware
 from trivialRoiFunctions import calculate_trivial_pack_expected_value
 from databaseFunctions import get_cardset_data, get_cardset_cards, updateVarients, import_set_card_prices
@@ -38,12 +38,6 @@ def read_root():
 async def read_test_151():
     return await calculate_trivial_pack_expected_value("151")
 
-@app.get("/test/Updateprices/{set_name}")
-async def read_set_price(set_name: str):
-    logging.info(f"Updating prices for set {set_name}")
-    result = await update_prices_for_set(set_name)
-    return result
-    #update_prices_for_set(set_name)
 
 @app.get("/test/{set_name}")
 async def read_set(set_name: str):
@@ -59,6 +53,6 @@ async def read_setsImport():
     msg = await importSetsToPrice()
     return msg
 
-@app.get("/test/grabPrices/151}")
+@app.get("/test/grabPrices/151")
 async def read_grabPrices_set():
     return await import_set_card_prices("151")
