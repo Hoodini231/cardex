@@ -24,6 +24,10 @@ Get functions
 def get_cardset_data(set: str) -> dict:
     return cardsets_db.find_one({"name": set})
 
+async def get_generation_from_set(set: str) -> str:
+    set_data = await cardsets_db.find_one({"name": set})
+    return set_data["series"]
+
 async def get_cardset_cards(set: str) -> dict:
     cursor = cards_db.find({"set": set})
     cards = await cursor.to_list(length=300)

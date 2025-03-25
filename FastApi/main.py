@@ -1,10 +1,10 @@
 import logging
 
 from fastapi import FastAPI, Query
-from priceScraping import get_price_charting_data, price_scrape
+from priceScraping import get_price_charting_data
 from fastapi.middleware.cors import CORSMiddleware
 from trivialRoiFunctions import calculate_trivial_pack_expected_value
-from databaseFunctions import get_cardset_data, get_cardset_cards, updateVarients, import_set_card_prices
+from databaseFunctions import get_cardset_data, get_cardset_cards, updateVarients, import_set_card_prices, get_generation_from_set
 
 
 app = FastAPI()
@@ -25,9 +25,10 @@ app.add_middleware(
 @app.get("/cardprice/updateAllPrices")
 
 @app.get("/cardprice/{set_name}/{card_name}/{card_number}")
-def read_card_price(set_name: str, card_name: str, card_number: str):
-    print("hello")
-    result = get_price_charting_data(set_name, card_name, card_number)
+async def read_card_price(set_name: str, card_name: str, card_number: str):
+    logging.info(f"Getting card price start >>> {set_name}| {card_name} | {card_number}")
+    generation = await get_generation_from_set(set_name)
+    result = get_price_charting_data(generation, set_name, card_name, card_number)
     return {"data": result}
 
 @app.get("/")
