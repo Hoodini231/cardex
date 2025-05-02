@@ -23,7 +23,7 @@ PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's
 ## ⚙️ Tech Stack
 
 - **Frontend:** Next.JS written with Javascript and Typescript.
-- **Backend:** Node.JS and MongoDB as noSQL storage written in Javascript with Python scripts wrapped with FastAPI
+- **Backend:** FastAPI with MongoDB storage
 - **Deployment:** Aiming to be hosted on AWS cloud services for scalability and reliability.
 
 ---
