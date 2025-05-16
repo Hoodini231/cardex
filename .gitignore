@@ -21,7 +21,6 @@
 /build
 
 # Ignore compiled JS files from TypeScript
-*.js
 *.js.map
 *.d.ts
 *.gz
