@@ -1,48 +1,36 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { Button } from "./ui/button";
 import { ChevronDown, ChevronUp, Search, ChevronRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "./ui/input";
 import "@/app/globals.css";
 import axios from "axios";
+import cardGens from '../public/cardGens.js'
 
 interface Collection {
   id: string;
   name: string;
-  icon: string;
+  shortName: string;
   created: number;
-  series?: Subcollection[];
+  series: {
+      id: string;
+      name: string;
+  }[];
 }
 
-interface Subcollection {
-  id: string;
-  name: string;
-}
 
 export function CollectionHorizontalBar({
   onChosenSet,
 }: {
   onChosenSet?: (setId: string) => void; // Add this
 }) {
-  const [allCollections, setAllCollections] = useState<Collection[]>([]);
+  const [allCollections, setAllCollections] = useState<Collection[]>(cardGens.sort((a, b) => a.created > b.created ? -1 : 1));
   const [expandedCollectionIds, setExpandedCollectionIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchCollections = async () => {
-    try {
-      const response = await axios.get<Collection[]>("http://localhost:5001/get/gens");
-      const sortedCollections = response.data.sort((a, b) => b.created - a.created);
-      setAllCollections(sortedCollections);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
-  useEffect(() => {
-    fetchCollections();
-  }, []);
 
   // Filter collections by name
   const filteredCollections = allCollections.filter((collection) =>
@@ -128,7 +116,7 @@ export function CollectionHorizontalBar({
                       )}
                       <span className="flex items-center gap-2">
                         <span className="inline-flex items-center justify-center bg-blue-100 text-blue-800 rounded-full w-6 h-6 text-xs font-medium">
-                          {collection.icon}
+                          {collection.shortName}
                         </span>
                         {collection.name}
                       </span>

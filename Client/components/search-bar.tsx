@@ -2,8 +2,8 @@
 import '@/app/globals.css';
 import { useState, useEffect } from "react"
 import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
 import Axios from "axios"
+import React from 'react';
 
 export function SearchBar({
   onSearch,

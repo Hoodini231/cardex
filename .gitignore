@@ -24,6 +24,10 @@
 *.js
 *.js.map
 *.d.ts
+*.gz
+*.tgz
+*.zip
+*.jpg
 
 # Ignore node_modules folder
 node_modules/
