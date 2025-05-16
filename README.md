@@ -1,12 +1,13 @@
 # [In-progress] CardeDex - Centralized Pokemon TCG collecting platform
 
 PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's. The platform integrates organizing portfolios, warehouse for pokemon card data, price monitoring, data analytics, and AI-driven insights** to increase user agency and decision-making.
-
-![image](https://github.com/user-attachments/assets/b9250ad9-3026-4ace-b7a9-5b118579b933)
-
+<img width="1508" alt="cardex homepage" src="https://github.com/user-attachments/assets/4c8bf4e6-0378-4be9-aff0-e45375b59538" />
 
 
-### 🔗 [Expected launch - May 31th 2025]
+
+
+
+### 🔗 [Expected launch - July 31th 2025]
 
 ---
 
@@ -64,7 +65,23 @@ PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's
   - Check reddis cache if user params are the same to avoid overhead on risk and utility re-calculation.
 
 
-### 1️⃣ Clone the Repository
-```sh
-git clone https://github.com/Hoodini231/MediTrack.git
-cd MediTrack
+## Visual Captures
+
+### Collections page
+<img width="1233" alt="Cardex collections" src="https://github.com/user-attachments/assets/746b2a2f-5af5-4c7d-8947-24b42e5f4ce1" />
+
+### Card detail pop up
+<img width="517" alt="Cardex pop up page" src="https://github.com/user-attachments/assets/806e6eae-ef46-4c81-848e-88084898b04a" />
+
+### ROI set page
+<img width="1177" alt="Cardex ROI sets" src="https://github.com/user-attachments/assets/d7838472-a3d0-4f4b-8a7c-c9f0a90d4a45" />
+
+### ROI calculator page
+<img width="1115" alt="ROI calcuation" src="https://github.com/user-attachments/assets/dfd057fb-0d37-4dcb-b36a-634ea9b649b7" />
+
+### ROI pack breakdown tab
+<img width="516" alt="Packbreakdown" src="https://github.com/user-attachments/assets/e6e6d56a-0c41-4fe8-89c2-894864339d18" />
+
+
+
+ 
