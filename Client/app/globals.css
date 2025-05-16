@@ -1,6 +1,32 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+input[type='range'] {
+  -webkit-appearance: none; 
+ height: 7px; 
+ background: rgb(228, 226, 226); 
+ border-radius: 5px; 
+ background-image: linear-gradient(#ffffff, #bbc7f7); 
+ background-repeat: no-repeat; 
+ }
+
+ input[type='range']::-webkit-slider-thumb { 
+  -webkit-appearance: none; 
+  height: 15px; 
+  width: 15px; 
+  border-radius: 50%; 
+  background: #7897f5; 
+  cursor: pointer; 
+  box-shadow: 0 0 2px 0 #555; 
+  }
+
+  input[type="range"]::-webkit-slider-runnable-track { 
+    -webkit-appearance: none; 
+    box-shadow: none; 
+    border: none; 
+    background: transparent; 
+    }
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -46,7 +72,12 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
   }
+
+  
 }
+
+
+
 
 @layer base {
   * {
@@ -54,5 +85,8 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  .input[type="range"].slider {
+    @apply w-full h-2 bg-red-800 rounded;
   }
 }

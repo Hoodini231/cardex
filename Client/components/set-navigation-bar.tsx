@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { ChevronDown } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
+import { Button } from "./ui/button"
+import { ScrollArea } from "./ui/scroll-area"
 import axios from "axios"
+import React from "react"
 
 interface SetCollection {
   id: string
