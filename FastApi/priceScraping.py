@@ -12,7 +12,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")
-driver = webdriver.Chrome(options=options)
+driver = webdriver.Chrome(executable_path="D:/cardex/FastApi/chromedriver.exe",options=options)
 SCROLL_PAUSE_TIME = 1.5
 
 # Price Charting webpage
@@ -62,7 +62,7 @@ def get_price_charting_data(generation_name: str, set_name: str, card_name: str,
         lambda: f"{PRICE_CHARTING_CARD_URL}{'promo'}/{normalized_card_name}-{card_number}",
         lambda: f"{PRICE_CHARTING_CARD_URL}{normalized_set_name.replace('vs','&')}/{normalized_card_name}-{card_number}",
         lambda: f"{PRICE_CHARTING_CARD_URL}{normalized_generation_name}-{normalized_set_name}/{normalized_card_name}-{card_number}",
-        lambda: f"{PRICE_CHARTING_CARD_URL}{normalized_generation_name.replace("and", "&")}-{normalized_set_name}/{normalized_card_name}-{card_number}",
+        lambda: f"{PRICE_CHARTING_CARD_URL}{normalized_generation_name.replace('and', '&')}-{normalized_set_name}/{normalized_card_name}-{card_number}",
     ]
     tableFound = False
     # hit heuristics until valid data

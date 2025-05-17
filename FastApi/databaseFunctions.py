@@ -9,6 +9,7 @@ from pokemontcgsdk import Card
 from priceScraping import get_price_charting_data
 from serializer import serialize_cardgen_list
 
+load_dotenv()
 # MongoDB connection details
 MONGO_DETAILS = os.getenv("DATABASE_STRING")
 client = AsyncIOMotorClient(MONGO_DETAILS)

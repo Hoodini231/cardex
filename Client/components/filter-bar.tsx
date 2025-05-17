@@ -48,6 +48,10 @@ export function FilterBar({
     })
   }, [selectedRarity, chaseRarity, priceRange, onFilter])
 
+  useEffect(() => {
+    setSelectedRarity("all")
+  }, [chosenSet])
+
 
 
   // Handle search input changes

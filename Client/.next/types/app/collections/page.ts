@@ -1,4 +1,4 @@
-// File: /Users/shaun/Documents/cardex/Client/app/collections/page.tsx
+// File: D:\cardex\Client\app\collections\page.tsx
 import * as entry from '../../../../app/collections/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

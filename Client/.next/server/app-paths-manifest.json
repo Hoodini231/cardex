@@ -1,5 +1,4 @@
 {
-  "/roi-calculator/page": "app/roi-calculator/page.js",
-  "/page": "app/page.js",
-  "/collections/page": "app/collections/page.js"
+  "/collections/page": "app/collections/page.js",
+  "/page": "app/page.js"
 }

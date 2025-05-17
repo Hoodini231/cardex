@@ -45,30 +45,25 @@ function CardDetailDialog({ card, onToggleChase, cardPrice }: { card: any; onTog
                 <h2 className="text-2xl font-bold">{card.name} #{card.number}</h2>
                 <p className="text-sm text-muted-foreground">{card.set}</p>
               </div>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <X className="h-5 w-5" />
-                </Button>
-              </DialogTrigger>
             </div>
   
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-3">Card Details</h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Type:</span>
-                    <span>{card.type}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">HP:</span>
-                    <span>{card.hp}</span>
-                  </div>
-                  <div className="flex justify-between">
+                <div className="grid grid-cols-2 gap-3">
+                <div className="flex justify-between text-[12px] w-full">
+                  <span className="text-muted-foreground">Type:</span>
+                  <span className="text-right">{card.types}</span>
+                </div>
+                  <div className="flex justify-between text-[12px] w-full">
                     <span className="text-muted-foreground">Rarity:</span>
                     <span>{card.rarity}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-[12px] w-full">
+                    <span className="text-muted-foreground">HP:</span>
+                    <span>{card.hp}</span>
+                  </div>
+                  <div className="flex justify-between text-[12px] w-full">
                     <span className="text-muted-foreground">Set:</span>
                     <span>{card.set}</span>
                   </div>
@@ -76,28 +71,28 @@ function CardDetailDialog({ card, onToggleChase, cardPrice }: { card: any; onTog
               </div>
   
               <Tabs defaultValue="pricing">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="pricing">Pricing</TabsTrigger>
-                  <TabsTrigger value="grading">Grading</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 rounded-md">
+                  <TabsTrigger className="text-muted-foreground data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 px-2 py-1" value="pricing">Pricing</TabsTrigger>
+                  <TabsTrigger className="text-muted-foreground data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 px-2 py-1" value="grading">Grading</TabsTrigger>
                 </TabsList>
                 <TabsContent value="pricing" className="space-y-4 pt-4">
                   <div>
                     <div className="flex justify-between items-center py-3 border-b">
                       <span>Market Price</span>
                       <span className="font-bold">
-                        {cardPrice["Ungraded"] !== "-" ? `$${cardPrice["Ungraded"]}` : "-"}
+                        {cardPrice["Ungraded"] !== "-" ? `${cardPrice["Ungraded"]}` : "-"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-b">
                       <span>Avg. Sold Price (7 days)</span>
                       <span className="font-bold">
-                        {cardPrice["Ungraded"] !== "-" ? `$${cardPrice["Ungraded"]}` : "-"}
+                        {cardPrice["Ungraded"] !== "-" ? `${cardPrice["Ungraded"]}` : "-"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-b">
                       <span>Lowest Listed Price</span>
                       <span className="font-bold">
-                        {cardPrice["Ungraded"] !== "-" ? `$${cardPrice["Ungraded"]}` : "-"}
+                        {cardPrice["Ungraded"] !== "-" ? `${cardPrice["Ungraded"]}` : "-"}
                       </span>
                     </div>
                   </div>
