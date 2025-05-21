@@ -78,16 +78,26 @@ async def db_fetch_data_single_card(set_name: str, card_name: str, card_number: 
     card = await cards_db.find_one({"set": set_name, "name": card_name, "number": card_number})
     return card
 
-async def db_fetch_data_all_cards_in_set(set_name: str) -> dict:
-    cards_in_set = cards_db.find({"set": set_name}).sort("number")
-    cards = await cards_in_set.to_list(length=300)
-    print(cards)
-    output_dict = []
+async def db_fetch_data_all_cards_in_set(set_name: str, page: int = 1, page_size: int = 40) -> dict:
+    skip = (page - 1) * page_size
+
+    cards_cursor = cards_db.find({"set": set_name}).skip(skip).limit(page_size)
+    cards = await cards_cursor.to_list(length=page_size)
+
+    total_count = await cards_db.count_documents({"set": set_name})
+
+    cards.sort(key=lambda c: int(''.join(filter(str.isdigit, c["number"]))))
+
+    output_list = []
     for card in cards:
         combined_card_data = await db_combine_card_data_with_price(set_name, card)
-        print(combined_card_data)
-        output_dict.append(combined_card_data)
-    return output_dict
+        output_list.append(combined_card_data)
+
+    return {
+        "data": output_list,
+        "total": total_count
+    }
+
 
     
 async def db_combine_card_data_with_price(set_name: str, card_data: dict) -> dict:
