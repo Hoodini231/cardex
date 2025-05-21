@@ -25,3 +25,4 @@ origins = [
 async def read_update_info():
     logging.info("/get/updateInfo fetch request >>> Start")
     return await db_fetch_update_info()
+

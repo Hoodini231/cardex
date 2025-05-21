@@ -26,11 +26,6 @@ class Legalities(BaseModel):
     standard: Optional[str] = None
     expanded: Optional[str] = None
 
-class cardSet(BaseModel):
-    id: str = Field(..., description="Unique ID of the card set")
-    name: str = Field(..., description="Name of the card set")
-
-
 class CardModel(BaseModel):
     id: str
     name: str
@@ -44,7 +39,7 @@ class CardModel(BaseModel):
     weaknesses: Optional[List[Weakness]]  # List of dictionaries for weaknesses
     retreatCost: Optional[List[str]]
     convertedRetreatCost: Optional[int]
-    set: cardSet  # Expecting a string (e.g., set ID or name)
+    set: str  # Expecting a string (e.g., set ID or name)
     number: str
     artist: Optional[str]
     rarity: Optional[str]

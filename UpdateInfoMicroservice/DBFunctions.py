@@ -199,10 +199,7 @@ async def insertNewSetCards(setId: str, setTotal: int):
             weaknesses=weaknesses,
             retreatCost=currentCard.retreatCost,
             convertedRetreatCost=currentCard.convertedRetreatCost,
-            set={
-                "id": currentCard.set.id,
-                "name": currentCard.set.name
-            },
+            set=currentCard.set.name,
             number=currentCard.number,
             artist=currentCard.artist,
             rarity=currentCard.rarity,
@@ -215,4 +212,5 @@ async def insertNewSetCards(setId: str, setTotal: int):
         currentCard_dict = CardData.model_dump()
         logging.info("insertNewSetCards >>> Inserting new card into the database: %s", currentCard_dict)
         await cards_db.insert_one(currentCard_dict)
-        logging.info("insertNewSetCards >>> Insertion successful")
+        logging.info(f"insertNewSetCards >>> Insertion of {cardNumber} card successful")
+    logging.info(f"insertNewSetCards >>> Insertion of {setTotal} cards successful")
