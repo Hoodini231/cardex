@@ -51,18 +51,26 @@ export function PokemonCardGrid({
   const [cards, setCards] = useState<CardSet[]>([]);
   const [filteredCards, setFilteredCards] = useState<CardSet[]>([]);
   const [cardPrices, setCardPrices] = useState<{ [key: number]: any }>({});
+  const [page, setPage] = useState(1); // Initialize page state
+  const [totalPages, setTotalPages] = useState(0); // Initialize total pages state
 
-  const { data, isLoading, error } = useQuery<CardSet[]>({
-    queryKey: ["set_name", chosenSet],
+  const pageSize = 40;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["set_name", chosenSet, page],
     queryFn: async () => {
-      if (!chosenSet) return []; // Always return the same type (empty array)
-      const API_ENDPOINT = process.env.REACT_APP_BACKEND_API_ENDPOINT;
-      const res = await fetch(`http://127.0.0.1:8000/get/render/collections/${chosenSet}`);
-      const result = await res.json();
-      console.log(result);
-      return result;
+      if (!chosenSet) return { data: [], total: 0 };
+  
+      const res = await fetch(
+        `http://127.0.0.1:8000/get/render/collections/${chosenSet}?page=${page}&page_size=${pageSize}`
+      );
+      return await res.json(); // expects { data, total }
     },
+    enabled: !!chosenSet,
+    staleTime: 1000 * 60 * 15, //  15 min
+    refetchOnWindowFocus: false,
   });
+
 
   function priceCompare(a: PriceWrapper, b: PriceWrapper) {
     return a.price["Ungraded"] < b.price["Ungraded"] ? -1 : 1;
@@ -71,7 +79,7 @@ export function PokemonCardGrid({
 
   // Use the fetched data or fallback to an empty array
   useEffect(() => {
-    let result: CardSet[] = data ? [...data] : [];
+    let result: CardSet[] = data ? [...data.data] : [];
     if (searchQuery) {
       result = result.filter((card) =>
         card.name.toLowerCase().startsWith(searchQuery.toLowerCase())
@@ -108,6 +116,7 @@ export function PokemonCardGrid({
       });
     }
     setFilteredCards(result);
+    setTotalPages(Math.ceil(result.length / pageSize)); // Update total pages based on filtered results
   }, [data, searchQuery, sortBy, filterOptions]);
 
   const toggleChase = (id: number) => {
@@ -118,22 +127,25 @@ export function PokemonCardGrid({
   return (
     <div>
       {isLoading ? (
-        <div className="flex justify-center items-center h-full">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
-        </div>
+        <p>Loading...</p>
       ) : error ? (
-        <div>Error loading sets.</div>
+        <p>Error loading data.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {filteredCards.map((card) => (
-            <PokemonCard
-              key={card.id}
-              card={card}
-              onToggleChase={() => toggleChase(card.id)}
-              priceData={card.price.price || {}}
-            />
+        <>
+          {data.data.map((card, index) => (
+            <div key={index}>{/* render card here */}</div>
           ))}
-        </div>
+  
+          <div className="pagination-controls">
+            <button onClick={() => setPage(p => Math.max(p - 1, 1))} disabled={page === 1}>
+              Previous
+            </button>
+            <span>Page {page} of {totalPages}</span>
+            <button onClick={() => setPage(p => Math.min(p + 1, totalPages))} disabled={page === totalPages}>
+              Next
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

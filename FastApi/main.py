@@ -6,7 +6,6 @@ from priceScraping import get_price_charting_data, augment_rarity_data
 from fastapi.middleware.cors import CORSMiddleware
 from trivialRoiFunctions import calculate_trivial_pack_expected_value
 from databaseFunctions import db_fetch_set_roipage, db_fetch_set_rarities, db_fetch_all_cardgens, db_fetch_data_all_cards_in_set, db_fetch_data_single_card, db_fetch_price_single_card, db_fetch_combined_card_data, db_fetch_price_single_card, get_cardset_data, get_cardset_cards, updateVarients, import_set_card_prices, get_generation_from_set, fix_rarity_db, fix_products_db, get_all_cardsets, fix_shit, insertTracker, getTrackers
-from adjustedRoiFunctions import calculate_adjusted_roi
 from breakdown import calculateBreakdown
 import json
 from bson import ObjectId
@@ -180,12 +179,12 @@ async def read_fix_all_sets_prices():
                 continue
             elif set["series"] in ['Black & White', 'Base', 'Diamond & Pearl']:
                 await updateVarients(set["name"])
-                print(f"Varients added to set: {set["name"]}")
+                print(f"Varients added to set: {set['name']}")
                 await augment_rarity_data(set["name"])
-                print(f"New Rarities added to varients int set: {set["name"]}")
+                print(f"New Rarities added to varients int set: {set['name']}")
                 await import_set_card_prices(set["name"])
-                await insertTracker(set["name"])
-                print(f"Prices added to set: {set["name"]}")
+                await insertTracker(set['name'])
+                print(f"Prices added to set: {set['name']}")
                 output.append(set["name"])
         await sets.close()
         return output

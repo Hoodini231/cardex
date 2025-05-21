@@ -48,7 +48,7 @@ function PokemonCard({ card, onToggleChase, priceData }: { card: any; onToggleCh
             <CardContent className="p-0 relative">
               <div className="relative aspect-[3/4] w-full">
                 <Image
-                  src={`/dataset/${card.set}/${card.set}_${card.name}_${card.number}.jpg`.replace(/\s/g, '_')}
+                  src={card.imageLarge.replace(/\s/g, '_')}
                   alt={card.name}
                   fill
                   className="object-cover"
