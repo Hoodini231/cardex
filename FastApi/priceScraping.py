@@ -12,7 +12,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")
-driver = webdriver.Chrome(executable_path="D:/cardex/FastApi/chromedriver.exe",options=options)
 SCROLL_PAUSE_TIME = 1.5
 
 # Price Charting webpage

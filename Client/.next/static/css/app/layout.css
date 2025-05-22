@@ -99,7 +99,6 @@
     --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-    --animate-spin: spin 1s linear infinite;
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
@@ -612,6 +611,9 @@
   .h-px {
     height: 1px;
   }
+  .h-screen {
+    height: 100vh;
+  }
   .max-h-\(--radix-dropdown-menu-content-available-height\) {
     max-height: var(--radix-dropdown-menu-content-available-height);
   }
@@ -779,9 +781,6 @@
   }
   .transform {
     transform: var(--tw-rotate-x) var(--tw-rotate-y) var(--tw-rotate-z) var(--tw-skew-x) var(--tw-skew-y);
-  }
-  .animate-spin {
-    animation: var(--animate-spin);
   }
   .cursor-default {
     cursor: default;
@@ -1047,17 +1046,9 @@
     border-style: var(--tw-border-style);
     border-width: 1px;
   }
-  .border-1 {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-  }
   .border-2 {
     border-style: var(--tw-border-style);
     border-width: 2px;
-  }
-  .border-4 {
-    border-style: var(--tw-border-style);
-    border-width: 4px;
   }
   .border-x {
     border-inline-style: var(--tw-border-style);
@@ -1079,10 +1070,6 @@
     border-top-style: var(--tw-border-style);
     border-top-width: 1px;
   }
-  .border-t-2 {
-    border-top-style: var(--tw-border-style);
-    border-top-width: 2px;
-  }
   .border-r {
     border-right-style: var(--tw-border-style);
     border-right-width: 1px;
@@ -1091,37 +1078,18 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
   }
-  .border-b-2 {
-    border-bottom-style: var(--tw-border-style);
-    border-bottom-width: 2px;
-  }
   .border-l {
     border-left-style: var(--tw-border-style);
     border-left-width: 1px;
   }
-  .border-black {
-    border-color: var(--color-black);
-  }
   .border-blue-500 {
     border-color: var(--color-blue-500);
-  }
-  .border-border {
-    border-color: hsl(var(--border));
   }
   .border-gray-200 {
     border-color: var(--color-gray-200);
   }
   .border-gray-300 {
     border-color: var(--color-gray-300);
-  }
-  .border-gray-400 {
-    border-color: var(--color-gray-400);
-  }
-  .border-gray-700 {
-    border-color: var(--color-gray-700);
-  }
-  .border-gray-900 {
-    border-color: var(--color-gray-900);
   }
   .border-input {
     border-color: hsl(var(--input));
@@ -1143,9 +1111,6 @@
   }
   .bg-background {
     background-color: hsl(var(--background));
-  }
-  .bg-black {
-    background-color: var(--color-black);
   }
   .bg-black\/50 {
     background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
@@ -1170,9 +1135,6 @@
   }
   .bg-gray-200 {
     background-color: var(--color-gray-200);
-  }
-  .bg-gray-500 {
-    background-color: var(--color-gray-500);
   }
   .bg-muted {
     background-color: hsl(var(--muted));
@@ -1438,12 +1400,6 @@
   .text-xs {
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
-  }
-  .text-\[8px\] {
-    font-size: 8px;
-  }
-  .text-\[10px\] {
-    font-size: 10px;
   }
   .text-\[12px\] {
     font-size: 12px;
@@ -2375,11 +2331,6 @@
       background-color: hsl(var(--background));
     }
   }
-  .data-\[state\=active\]\:bg-muted {
-    &[data-state="active"] {
-      background-color: hsl(var(--muted));
-    }
-  }
   .data-\[state\=active\]\:bg-white {
     &[data-state="active"] {
       background-color: var(--color-white);
@@ -2616,12 +2567,6 @@
       line-height: var(--tw-leading, var(--text-5xl--line-height));
     }
   }
-  .md\:text-base {
-    @media (width >= 48rem) {
-      font-size: var(--text-base);
-      line-height: var(--tw-leading, var(--text-base--line-height));
-    }
-  }
   .md\:text-sm {
     @media (width >= 48rem) {
       font-size: var(--text-sm);
@@ -2632,16 +2577,6 @@
     @media (width >= 48rem) {
       font-size: var(--text-xl);
       line-height: var(--tw-leading, var(--text-xl--line-height));
-    }
-  }
-  .md\:text-\[8px\] {
-    @media (width >= 48rem) {
-      font-size: 8px;
-    }
-  }
-  .md\:text-\[12px\] {
-    @media (width >= 48rem) {
-      font-size: 12px;
     }
   }
   .lg\:grid-cols-4 {
@@ -2982,6 +2917,95 @@ input[type="range"]::-webkit-slider-runnable-track {
     background-color: var(--color-red-800);
   }
 }
+.spinnerContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.spinner {
+  position: relative;
+  border-radius: 50%;
+  animation: rotate 1.5s linear infinite;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.spinnerSmall {
+  width: 40px;
+  height: 40px;
+}
+.spinnerMedium {
+  width: 60px;
+  height: 60px;
+}
+.spinnerLarge {
+  width: 80px;
+  height: 80px;
+}
+.pokeballTop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background-color: #e53935;
+  border-radius: 50% 50% 0 0;
+}
+.pokeballBottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background-color: white;
+  border-radius: 0 0 50% 50%;
+}
+.pokeballMiddle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 10%;
+  background-color: #212121;
+  z-index: 1;
+}
+.pokeballInner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30%;
+  height: 30%;
+  background-color: white;
+  border-radius: 50%;
+  border: 4px solid #212121;
+  z-index: 2;
+}
+.loadingText {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loadingText {
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
 @keyframes enter {
   from {
     opacity: var(--tw-enter-opacity, 1);
@@ -3304,9 +3328,9 @@ input[type="range"]::-webkit-slider-runnable-track {
   syntax: "*";
   inherits: false;
 }
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
   }
 }
 

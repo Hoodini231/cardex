@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, List
 
 from pydantic import BaseModel
 from fastapi import FastAPI, Query
@@ -63,8 +64,37 @@ async def read_get_card_data(set_name: str, card_name: str, card_number: str):
     return await db_fetch_combined_card_data(set_name, card_name, card_number)
 
 @app.get("/get/render/collections/{set_name}")
-async def read_get_render_collections(set_name: str):
-    return await db_fetch_data_all_cards_in_set(set_name)
+async def read_get_render_collections(
+    set_name: str, 
+    page: int = Query(1, ge=1),
+    pageSize: int = Query(60, ge=1, le=300),
+    rarity: Optional[str] = None,
+    types: Optional[List[str]] = Query(None),
+    supertype: Optional[str] = None,
+    name: Optional[str] = None,
+    sort_by: Optional[str] = Query("number", description="Field to sort by"),
+    sort_order: Optional[int] = Query(1, description="Sort order: 1 for ascending, -1 for descending")
+    ):
+        # Create a filters dictionary with the provided query parameters
+        filters = {}
+        if rarity:
+            filters["rarity"] = rarity
+        if types:
+            filters["types"] = {"$in": types}
+        if supertype:
+            filters["supertype"] = supertype
+        if name:
+            filters["name"] = {"$regex": name, "$options": "i"}  # Case-insensitive search
+        
+        # Call the database function with filters
+        return await db_fetch_data_all_cards_in_set(
+            set_name=set_name, 
+            page=page, 
+            page_size=pageSize,
+            filters=filters,
+            sort_by=sort_by,
+            sort_order=sort_order
+    )
 
 @app.get("/get/collections")
 async def read_get_collections():

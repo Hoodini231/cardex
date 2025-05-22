@@ -13,6 +13,16 @@
 # testing
 /coverage
 
+# Next.js build output - use more aggressive patterns
+.next/**
+**/.next/**
+.next/*
+**/.next/*
+.vercel
+.env*.local
+next-env.d.ts
+out
+
 # next.js
 /.next/
 /out/
@@ -31,6 +41,14 @@
 # Ignore node_modules folder
 node_modules/
 
+# Cache files - add these lines
+.cache/
+**/.cache/
+**/*.pack
+**/*.pack.gz
+**/*.old
+**/*.meta
+**/*.hot-update.*
 
 # misc
 .DS_Store

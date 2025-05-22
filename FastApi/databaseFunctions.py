@@ -78,26 +78,76 @@ async def db_fetch_data_single_card(set_name: str, card_name: str, card_number: 
     card = await cards_db.find_one({"set": set_name, "name": card_name, "number": card_number})
     return card
 
-async def db_fetch_data_all_cards_in_set(set_name: str, page: int = 1, page_size: int = 40) -> dict:
-    skip = (page - 1) * page_size
-
-    cards_cursor = cards_db.find({"set": set_name}).skip(skip).limit(page_size)
-    cards = await cards_cursor.to_list(length=page_size)
-
-    total_count = await cards_db.count_documents({"set": set_name})
-
-    cards.sort(key=lambda c: int(''.join(filter(str.isdigit, c["number"]))))
-
-    output_list = []
-    for card in cards:
-        combined_card_data = await db_combine_card_data_with_price(set_name, card)
-        output_list.append(combined_card_data)
-
-    return {
-        "data": output_list,
-        "total": total_count
-    }
-
+async def db_fetch_data_all_cards_in_set(
+    set_name: str, 
+    page: int = 1, 
+    page_size: int = 40,
+    filters: dict = None,
+    sort_by: str = "number",
+    sort_order: int = 1
+) -> dict:
+    try:
+        skip = (page - 1) * page_size
+        query = {"set": set_name}
+        
+        # Add any additional filters
+        if filters:
+            query.update(filters)
+        
+        # Get total count for pagination info
+        total_count = await cards_db.count_documents(query)
+        
+        # Determine sorting
+        sort_field = sort_by
+        
+        # Special case for sorting by number (use natural sorting)
+        if sort_by == "number":
+            pipeline = [
+                {"$match": query},
+                {"$addFields": {
+                    "numericNumber": {"$toInt": {"$replaceAll": {"input": "$number", "find": "[^0-9]", "replacement": ""}}}
+                }},
+                {"$sort": {"numericNumber": sort_order}},
+                {"$skip": skip},
+                {"$limit": page_size},
+                {"$project": {"numericNumber": 0}}  # Remove the temporary sorting field
+            ]
+            
+            cursor = cards_db.aggregate(pipeline)
+            cards = await cursor.to_list(length=page_size)
+        else:
+            # For other fields, use the normal sort
+            cards_cursor = cards_db.find(query).sort(sort_field, sort_order).skip(skip).limit(page_size)
+            cards = await cards_cursor.to_list(length=page_size)
+        
+        # Build output list with prices
+        output_list = []
+        for card in cards:
+            combined_card_data = await db_combine_card_data_with_price(set_name, card)
+            output_list.append(combined_card_data)
+        
+        # Return data with pagination information
+        return {
+            "data": output_list,
+            "total": total_count,
+            "page": page,
+            "page_size": page_size,
+            "pages": (total_count + page_size - 1) // page_size,  # Ceiling division for total pages
+            "filters": filters or {}  # Include the applied filters in response
+        }
+        
+    except Exception as e:
+        import logging
+        logging.error(f"Error in db_fetch_data_all_cards_in_set: {str(e)}")
+        # Return empty response with error information
+        return {
+            "data": [],
+            "total": 0,
+            "page": page,
+            "page_size": page_size,
+            "pages": 0,
+            "error": str(e)
+        }
 
     
 async def db_combine_card_data_with_price(set_name: str, card_data: dict) -> dict:
