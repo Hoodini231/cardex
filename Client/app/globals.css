@@ -95,9 +95,13 @@ input[type='range'] {
 
 .spinner {
   position: relative;
+  width: 80px; /* or use a class like spinnerLarge */
+  height: 80px;
   border-radius: 50%;
   animation: rotate 1.5s linear infinite;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* ensure parts are clipped to circle */
+  background: white; /* fallback background */
 }
 
 /* Size variations */

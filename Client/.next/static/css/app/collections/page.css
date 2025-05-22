@@ -322,11 +322,11 @@
   .top-0 {
     top: calc(var(--spacing) * 0);
   }
+  .top-1 {
+    top: calc(var(--spacing) * 1);
+  }
   .top-1\/2 {
     top: calc(1/2 * 100%);
-  }
-  .top-2 {
-    top: calc(var(--spacing) * 2);
   }
   .top-4 {
     top: calc(var(--spacing) * 4);
@@ -339,6 +339,9 @@
   }
   .top-\[50\%\] {
     top: 50%;
+  }
+  .right-1 {
+    right: calc(var(--spacing) * 1);
   }
   .right-2 {
     right: calc(var(--spacing) * 2);
@@ -411,6 +414,9 @@
     @media (width >= 96rem) {
       max-width: 96rem;
     }
+  }
+  .m-0 {
+    margin: calc(var(--spacing) * 0);
   }
   .\!container {
     margin-inline: auto !important;
@@ -610,9 +616,6 @@
   }
   .h-px {
     height: 1px;
-  }
-  .h-screen {
-    height: 100vh;
   }
   .max-h-\(--radix-dropdown-menu-content-available-height\) {
     max-height: var(--radix-dropdown-menu-content-available-height);
@@ -1163,6 +1166,9 @@
   .bg-white\/50 {
     background-color: color-mix(in oklab, var(--color-white) 50%, transparent);
   }
+  .bg-white\/60 {
+    background-color: color-mix(in oklab, var(--color-white) 60%, transparent);
+  }
   .bg-white\/80 {
     background-color: color-mix(in oklab, var(--color-white) 80%, transparent);
   }
@@ -1247,6 +1253,12 @@
   .fill-current {
     fill: currentColor;
   }
+  .fill-none {
+    fill: none;
+  }
+  .fill-red-500 {
+    fill: var(--color-red-500);
+  }
   .fill-white {
     fill: var(--color-white);
   }
@@ -1257,9 +1269,9 @@
     -o-object-fit: contain;
        object-fit: contain;
   }
-  .object-cover {
-    -o-object-fit: cover;
-       object-fit: cover;
+  .object-fill {
+    -o-object-fit: fill;
+       object-fit: fill;
   }
   .p-0 {
     padding: calc(var(--spacing) * 0);
@@ -1435,6 +1447,9 @@
   }
   .whitespace-nowrap {
     white-space: nowrap;
+  }
+  .text-black\/50 {
+    color: color-mix(in oklab, var(--color-black) 50%, transparent);
   }
   .text-blue-600 {
     color: var(--color-blue-600);
@@ -1939,6 +1954,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-white);
+      }
+    }
+  }
+  .hover\:bg-white\/60 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, var(--color-white) 60%, transparent);
       }
     }
   }
@@ -2925,9 +2947,13 @@ input[type="range"]::-webkit-slider-runnable-track {
 }
 .spinner {
   position: relative;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   animation: rotate 1.5s linear infinite;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  background: white;
 }
 .spinnerSmall {
   width: 40px;

@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import CardDetailDialog from "./cardDetailDialog";
+import { Heart } from "lucide-react"; 
 
 function PokemonCard({ card, onToggleChase, priceData }: { card: any; onToggleChase: () => void; priceData: any }) {
     const EMPTY_PRICES = {
@@ -44,37 +45,36 @@ function PokemonCard({ card, onToggleChase, priceData }: { card: any; onToggleCh
     return (
       <Dialog>
         <DialogTrigger asChild>
-          <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-0 relative">
+          <Card className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow p-0 m-0">
+            <CardContent className="p-0 m-0">
               <div className="relative aspect-[3/4] w-full">
                 <Image
                   src={card.imageLarge.replace(/\s/g, '_')}
                   alt={card.name}
                   fill
-                  className="object-cover"
+                  className="object-fill"
                 />
-                <div className="absolute top-2 right-2 flex gap-1">
+                <div className="absolute top-1 right-1 flex gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="bg-white/80 hover:bg-white/90 rounded-full h-8 w-8 p-1"
-                    onClick={handleToggleChase}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent click from opening dialog
+                      setIsWishlisted((prev) => !prev);
+                    }}
+                    className="bg-white/60 hover:bg-white/60 rounded-full h-8 w-8 p-1 transition"
                   >
-                    {/* Your Chase button content */}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="bg-white/80 hover:bg-white/90 rounded-full h-8 w-8 p-1"
-                    onClick={toggleWishlist}
-                  >
-                    {/* Your Wishlist button content */}
+                    <Heart
+                      className={`h-5 w-5 transition-colors ${
+                        isWishlisted ? "fill-red-500 text-red-500" : "fill-none text-black/50"
+                      }`}
+                    />
                   </Button>
                 </div>
               </div>
               <div className="p-3">
-                <h3 className="font-medium text-sm truncate">{card.name} #{card.number}</h3>
-                <p className="text-xs text-muted-foreground truncate">{card.set}</p>
+                <h3 className="font-medium text-sm truncate">{card.name}</h3>
+                <p className="text-xs text-muted-foreground truncate">{card.set} #{card.number}</p>
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-primary font-bold">
                     {priceData["Ungraded"] || EMPTY_PRICES["Ungraded"]}
