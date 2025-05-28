@@ -6,7 +6,7 @@ from fastapi import FastAPI, Query
 from priceScraping import get_price_charting_data, augment_rarity_data
 from fastapi.middleware.cors import CORSMiddleware
 from trivialRoiFunctions import calculate_trivial_pack_expected_value
-from databaseFunctions import db_fetch_set_roipage, db_fetch_set_rarities, db_fetch_all_cardgens, db_fetch_data_all_cards_in_set, db_fetch_data_single_card, db_fetch_price_single_card, db_fetch_combined_card_data, db_fetch_price_single_card, get_cardset_data, get_cardset_cards, updateVarients, import_set_card_prices, get_generation_from_set, fix_rarity_db, fix_products_db, get_all_cardsets, fix_shit, insertTracker, getTrackers
+from databaseFunctions import fix_keyerrors_cards, fix_limited_retrival_set_list_bug, db_fetch_set_roipage, db_fetch_set_rarities, db_fetch_all_cardgens, db_fetch_data_all_cards_in_set
 from breakdown import calculateBreakdown
 import json
 from bson import ObjectId
@@ -67,7 +67,7 @@ async def read_get_card_data(set_name: str, card_name: str, card_number: str):
 async def read_get_render_collections(
     set_name: str, 
     page: int = Query(1, ge=1),
-    pageSize: int = Query(60, ge=1, le=300),
+    pageSize: int = Query(42, ge=1, le=300),
     rarity: Optional[str] = None,
     types: Optional[List[str]] = Query(None),
     supertype: Optional[str] = None,
@@ -150,8 +150,15 @@ SCHEMA UPDATE API FUNCTION CALLS
 ========================================================================================
 '''
 
-
-
+@app.get("/insert/prices/{set_name}")
+async def read_insert_prices(set_name: str):
+    # Check if the set name is valid
+    if not set_name:
+        return {"error": "Set name is required."}
+    
+    # Call the function to insert prices
+    await import_set_card_prices(set_name)
+    return {"message": f"Prices for {set_name} have been inserted."}
 
 
 
@@ -162,13 +169,18 @@ SCHEMA UPDATE API FUNCTION CALLS
 ONE TIME DATA MANIPULATION FIX FUNCTIONS
 ========================================================================================
 '''
-@app.get("/insert/tracker")
-async def insert_tracker():
-    return await insertTracker()
+@app.get("/fix/limitedRetrivalSetListBug/insertVarientsAndPrices")
+async def read_fix_limited_retrival_set_list_bug():
+    return await fix_limited_retrival_set_list_bug()
+
+@app.get("/fix/keyerrors/cards")
+async def read_fix_keyerrors_cards():
+    return await fix_keyerrors_cards()
+
 
 @app.get('/test/scrape')
 async def test_scrape():
-    return get_price_charting_data("Scarlet & Violet", "151", "Charizard ex", "199", "")
+    return await get_price_charting_data("Sword & Shield", "SWSH Black Star Promos", "Professors's Research", "SWSH178", "")
 
 @app.get("/fixrarity")
 async def fix_rarity():
@@ -182,7 +194,6 @@ async def insert_varients(set_name: str):
 @app.get("/import/sets/toPrice")
 async def read_setsImport():
     msg = await i
-
 
 @app.get("/fixProducts/{set_name}")
 async def read_fix_products(set_name: str):
@@ -220,36 +231,7 @@ async def read_fix_all_sets_prices():
         return output
     except CursorNotFound as e:
         read_fix_all_sets_prices()
-@app.get("/fix/poor/set/{set_name}")
-async def read_fix_poorf(set_name: str):
-    cards = await get_cardset_cards(set_name)
-    for card in cards:
-        if "Common" in card["rarity"] or "Uncommon" in card["rarity"]:
-            await fix_shit(card['id'])
-@app.get("/t")
-async def r_t():
-    return await getTrackers()
-@app.get("/fix/poor/{set_name}")
-async def read_fix_poorf(set_name: str):
-    cards = await get_cardset_cards(set_name)
-    return await fix_shit('sv8pt5-20')
-'''
-========================================================================================
-TEST API CALLS
-========================================================================================
-'''
 
 
-@app.get("/test/grabPrices/151")
-async def read_grabPrices_set():
-    return await import_set_card_prices("151")
-
-@app.get("/test/151")
-async def read_test_151():
-    return await calculate_trivial_pack_expected_value("151")
-
-@app.get("/test/setROI/{set_name}")
-async def read_set_roi(set_name: str):
-    return await calculate_trivial_pack_expected_value(set_name)
 
 

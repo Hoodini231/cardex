@@ -16,6 +16,26 @@
       "static/chunks/main-app.js",
       "static/css/app/collections/page.css",
       "static/chunks/app/collections/page.js"
+    ],
+    "/roi-calculator/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/roi-calculator/page.js"
+    ],
+    "/my-collection/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/my-collection/page.js"
+    ],
+    "/market-watch/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/market-watch/page.js"
+    ],
+    "/wishlist/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/wishlist/page.js"
     ]
   }
 }

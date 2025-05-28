@@ -44,7 +44,7 @@ webscrapes price data from price charting
 @param set_name: the name of the set to scrape
 @return: a dictionary containing the data
 '''
-def get_price_charting_data(generation_name: str, set_name: str, card_name: str, card_number: str, varient_name: str = ""):
+async def get_price_charting_data(generation_name: str, set_name: str, card_name: str, card_number: str, varient_name: str = ""):
     normalized_generation_name = normalizeString(generation_name)
     normalized_set_name = normalizeString(set_name)
     normalized_card_name = normalizeString(card_name)
@@ -74,6 +74,7 @@ def get_price_charting_data(generation_name: str, set_name: str, card_name: str,
             response = requests.get(url)
             soup = bs4(response.content, "html.parser")
             div = soup.find("div", id="full-prices")
+            
             if div:
                 table = div.find("table")
                 if table:
@@ -88,44 +89,58 @@ def get_price_charting_data(generation_name: str, set_name: str, card_name: str,
                             if tableFound == False:
                                 tableFound = True
             else:
-                print("Table not found ->>>  activating alt page scrape")
-                card_price_charting_data = alt_page_scrape(url, card_name, varient_name)
-                if card_price_charting_data != {}:
-                    break
+                try:
+                    card_price_charting_data = await alt_page_scrape(url, card_name, varient_name)
+                    if card_price_charting_data != {}:
+                        break
+                except Exception as e:
+                    logging.error(f"Error: {e}")
         except:
             try:
                 # Self-heal approach should url fail and redirect to alt page
-                print("meow >>> activating alt page scrape")
-                card_price_charting_data = alt_page_scrape(url, card_name, varient_name)
-            except:
-                logging.error(f"Error:")
-            
+                card_price_charting_data = await alt_page_scrape(url, card_name, varient_name)
+            except Exception as e:
+                logging.error(f"Error: {e}")
+    print("Final card price charting data: ", card_price_charting_data)       
     return card_price_charting_data
 
 async def alt_page_scrape(url, card_name, varient: str):
-    '''
-    This function is part of a self-heal where if URL leads to a alternative table page, it will scrape the data from that page
-    '''
+    print("Alternate Page Scrape start")
     try:
         response = requests.get(url)
         soup = bs4(response.content, "html.parser")
         divs = soup.find("div", id="content")
         sr = divs.find("div", id="search-results")
-        data = []
+        data = {}
         if sr:
             x = sr.find("table")
             rows = x.find_all("tr")
             for row in rows:
                 cols = row.find_all("td")
                 if len(cols) >= 4:
-                    res = handle_PC_alternative_table_scraped_name(cols[1].text, card_name, varient)
-                    print(res)
-                    return res
+                    # Extract href from the first column with an image
+                    if cols[0].find('a'):
+                        href_url = cols[0].find('a')['href']
+                        print(f"Found href: {href_url}")
+                        # Now scrape this URL directly
+                        card_data = handle_PC_alternative_table_scraped_name(href_url, card_name, varient)
+                        return card_data
+                    # Alternative: get href from the second column with title
+                    elif cols[1].find('a'):
+                        href_url = cols[1].find('a')['href']
+                        print(f"Found href from title: {href_url}")
+                        # Now scrape this URL directly
+                        card_data = handle_PC_alternative_table_scraped_name(href_url, card_name, varient)
+                        return card_data
+                    # If no href is found, try to match the name
+                    else:
+                        res = handle_PC_alternative_table_scraped_name(cols[1].text, card_name, varient)
+                        return res
                     
-    except:
-        logging.error(f"Error: {e}")
+    except Exception as e:
+        logging.error(f"Error in alt_page_scrape: {e}")
         
-    return 'duc'
+    return {}
 
 def handle_PC_alternative_table_scraped_name(scraped_name: str, card_name: str, varient: str):
     if varient != '':
@@ -137,21 +152,44 @@ def handle_PC_alternative_table_scraped_name(scraped_name: str, card_name: str, 
     
 
 def direct_scrape_no_heal(url: str):
-    response = requests.get(url)
-    soup = bs4(response.content, "html.parser")
-    div = soup.find("div", id="full-prices")
-    if div:
-        table = div.find("table")
-        if table:
-            rows = table.find_all("tr")
-            for row in rows:
-                columns = row.find_all("td")
-                # Each row should be a grade and price
-                if columns and len(columns) >= 2:
-                    grade = columns[0].text.strip()
-                    price = columns[1].text.strip()
-                    card_price_charting_data[grade] = price
-    return card_price_charting_data
+    try:
+        print("Direct scrape no heal")
+        response = requests.get(url)
+        soup = bs4(response.content, "html.parser")
+        div = soup.find("div", id="full-prices")
+        price_dict = {}
+        if div:
+            table = div.find("table")
+            if table:
+                rows = table.find_all("tr")
+                for row in rows:
+                    columns = row.find_all("td")
+                    if columns and len(columns) >= 2:
+                        grade = columns[0].text.strip()
+                        price = columns[1].text.strip()
+                        price_dict[grade] = price
+        return price_dict
+    except Exception as e:
+        logging.error(f"Error in direct_scrape_no_heal: {e}")
+        return {
+            "Ungraded": "$-",
+            "Grade 1": "$-",
+            "Grade 2": "$-",
+            "Grade 3": "$-",
+            "Grade 4": "$-",
+            "Grade 5": "$-",
+            "Grade 6": "$-",
+            "Grade 7": "$-",
+            "Grade 8": "$-",
+            "Grade 9": "$-",
+            "Grade 9.5": "$-",
+            "SGC 10": "$-",
+            "CGC 10": "$-",
+            "PSA 10": "$-",
+            "BGS 10": "$-",
+            "BGS 10 Black": "$-",
+            "CGC 10 Pristine": "$-"
+        }
 '''
 ==========================================
 Web scraping functions to augemnt datasets

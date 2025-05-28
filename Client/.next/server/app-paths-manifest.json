@@ -1,5 +1,8 @@
 {
-  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/collections/page": "app/collections/page.js",
   "/page": "app/page.js",
-  "/collections/page": "app/collections/page.js"
+  "/market-watch/page": "app/market-watch/page.js",
+  "/my-collection/page": "app/my-collection/page.js",
+  "/wishlist/page": "app/wishlist/page.js",
+  "/roi-calculator/page": "app/roi-calculator/page.js"
 }

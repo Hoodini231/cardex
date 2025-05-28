@@ -1,9 +1,9 @@
 # This file contains the functions that interact with the database
 # database_functions.py
 import os
+import re
 
 from dotenv import load_dotenv
-from pymongo import MongoClient
 from motor.motor_asyncio import AsyncIOMotorClient
 from pokemontcgsdk import Card
 from priceScraping import get_price_charting_data
@@ -35,11 +35,6 @@ def recursive_serialize(obj):
         return {key: recursive_serialize(value) for key, value in obj.items()}
     else:
         return obj
-
-async def fix_shit(card_name: str):
-    card = Card.find(card_name)
-    price_data = card.tcgplayer.prices
-    ungraded = price_data.normal
 
 async def fix_rarity_db():
     # Fetch all cardSets from the API
@@ -100,45 +95,107 @@ async def db_fetch_data_all_cards_in_set(
         # Determine sorting
         sort_field = sort_by
         
-        # Special case for sorting by number (use natural sorting)
         if sort_by == "number":
             pipeline = [
                 {"$match": query},
-                {"$addFields": {
-                    "numericNumber": {"$toInt": {"$replaceAll": {"input": "$number", "find": "[^0-9]", "replacement": ""}}}
-                }},
-                {"$sort": {"numericNumber": sort_order}},
+                {"$sort": {"sortableNumber": sort_order}},
                 {"$skip": skip},
                 {"$limit": page_size},
-                {"$project": {"numericNumber": 0}}  # Remove the temporary sorting field
+                {"$project": {"numberSuffix": 0}}
             ]
-            
+
             cursor = cards_db.aggregate(pipeline)
             cards = await cursor.to_list(length=page_size)
+        
+        elif sort_by == "name":
+            # Ensure case-insensitive sorting for names
+            pipeline = [
+                {"$match": query},
+                {"$addFields": {"nameLower": {"$toLower": "$name"}}},
+                {"$sort": {"nameLower": sort_order}},
+                {"$skip": skip},
+                {"$limit": page_size},
+                {"$project": {"nameLower": 0}}
+            ]
+            cursor = cards_db.aggregate(pipeline)
+            cards = await cursor.to_list(length=page_size)
+            
+        elif sort_by == "price":
+            # For price sorting, we need to fetch all cards first and sort them manually
+            # since price data is added after the initial database query
+            
+            # Get all matching cards first
+            cursor = cards_db.find(query)
+            all_cards = await cursor.to_list(length=1000)  # Reasonable limit
+            
+            # Process prices for all cards
+            all_cards_with_prices = []
+            for card in all_cards:
+                combined_card_data = await db_combine_card_data_with_price(set_name, card)
+                
+                # Extract the price value for sorting (default to 0 if not found)
+                try:
+                    price_value = 0
+                    if combined_card_data.get('price', {}).get('price', {}).get('Ungraded'):
+                        price_str = combined_card_data['price']['price']['Ungraded'].replace('$', '').replace(',', '')
+                        price_value = float(price_str)
+                except (ValueError, AttributeError, KeyError):
+                    # If price conversion fails, default to 0
+                    price_value = 0
+                
+                # Add price_value for sorting
+                combined_card_data['_sort_price'] = price_value
+                all_cards_with_prices.append(combined_card_data)
+            
+            # Sort the cards by price
+            all_cards_with_prices.sort(
+                key=lambda card: card.get('_sort_price', 0),
+                reverse=(sort_order == -1)
+            )
+            
+            # Apply pagination
+            paginated_cards = all_cards_with_prices[skip:skip+page_size]
+            
+            # Remove the temporary sorting field
+            for card in paginated_cards:
+                if '_sort_price' in card:
+                    del card['_sort_price']
+            
+            # Skip the regular processing loop since we've already processed these cards
+            return {
+                "data": paginated_cards,
+                "total": total_count,
+                "page": page,
+                "page_size": page_size,
+                "pages": (total_count + page_size - 1) // page_size,
+                "filters": filters or {}
+            }
+        
         else:
-            # For other fields, use the normal sort
-            cards_cursor = cards_db.find(query).sort(sort_field, sort_order).skip(skip).limit(page_size)
-            cards = await cards_cursor.to_list(length=page_size)
+            # Default sorting for other fields
+            cursor = cards_db.find(query).sort(sort_field, sort_order).skip(skip).limit(page_size)
+            cards = await cursor.to_list(length=page_size)
         
         # Build output list with prices
-        output_list = []
+        
+        output = []
         for card in cards:
             combined_card_data = await db_combine_card_data_with_price(set_name, card)
-            output_list.append(combined_card_data)
-        
+            output.append(combined_card_data)
         # Return data with pagination information
         return {
-            "data": output_list,
+            "data": output,
             "total": total_count,
             "page": page,
             "page_size": page_size,
-            "pages": (total_count + page_size - 1) // page_size,  # Ceiling division for total pages
-            "filters": filters or {}  # Include the applied filters in response
+            "pages": (total_count + page_size - 1) // page_size,
+            "filters": filters or {}
         }
         
     except Exception as e:
         import logging
-        logging.error(f"Error in db_fetch_data_all_cards_in_set: {str(e)}")
+        exception_type = type(e).__name__
+        logging.error(f"Error in db_fetch_data_all_cards_in_set: {exception_type} {str(e)}")
         # Return empty response with error information
         return {
             "data": [],
@@ -154,7 +211,9 @@ async def db_combine_card_data_with_price(set_name: str, card_data: dict) -> dic
     card_name = card_data.get("name", "")
     card_number = card_data.get("number", "")
     card_rarity = card_data.get("rarity", "")
+    print(f"Fetching price for card: {card_name} | {card_number} | {card_rarity}")
     card_price = await db_fetch_price_single_card(set_name, card_name, card_number, card_rarity)
+    print(f"Card price: {card_price}")
     if card_data:
         card_data['price'] = card_price
     return serialize_document(card_data) if card_data else {}
@@ -184,8 +243,12 @@ async def db_fetch_all_cardgens() -> dict:
 
 async def db_fetch_set_rarities(set_name: str) -> dict:
     card_set = await cardsets_db.find_one({"name": set_name})
-    print(card_set['rarities'])
     rarities = card_set['rarities']
+    print(f"Rarities for set {set_name}: {rarities}")
+    if rarities == [None]:
+        # If no rarities are found, return an empty list
+        print(f"No rarities found for set: {set_name}")
+        return []
     return sorted(rarities)
 
 async def db_fetch_set_roipage() -> list:
@@ -251,7 +314,7 @@ async def get_generation_from_set(set: str) -> str:
 
 async def get_cardset_cards(set: str) -> dict:
     cursor = cards_db.find({"set": set})
-    cards = await cursor.to_list(length=300)
+    cards = await cursor.to_list(length=600)
     for card in cards:
         card["_id"] = str(card["_id"])
     return cards
@@ -354,16 +417,17 @@ For every card set in prices, update the cardPrices to have a full list of all c
 '''
 async def import_set_card_prices(set_name: str) -> str:
     try:
+        watchlist = []
         setCards = await get_cardset_cards(set_name)
         set_in_priceDB = await prices_db.find_one({"name": set_name})
         set_card_data = set_in_priceDB["cardPrices"]
         generation_name = await get_generation_from_set(set_name)
         for card in setCards:
-            print("parsing card: " + str(card["name"]))
+            print("card id:", card["id"])
             if card["varients"] != []:
                 # create obj to add to list for every varient
                 for varient in card["varients"]:
-                    card_price = get_price_charting_data(generation_name,set_name, card["name"], card["number"], varient)
+                    card_price = await get_price_charting_data(generation_name,set_name, card["name"], card["number"], varient)
                     card_object = {
                         "name": card["name"],
                         "number": card["number"],
@@ -373,24 +437,49 @@ async def import_set_card_prices(set_name: str) -> str:
                     if varient not in set_card_data:
                         set_card_data[varient] = {}
                     set_card_data[varient][card["name"]] = card_object
-            
-            
 
+            card_price = await get_price_charting_data(generation_name,set_name, card["name"], card["number"])
 
-            card_price = get_price_charting_data(generation_name, set_name, card["name"], card["number"])
+            cardprice_default = {
+                "Ungraded": "$-",
+                "Grade 1": "-",
+                "Grade 2": "-",
+                "Grade 3": "-",
+                "Grade 4": "-",
+                "Grade 5": "-",
+                "Grade 6": "-",
+                "Grade 7": "-",
+                "Grade 8": "$-",
+                "Grade 9": "$-",
+                "Grade 9.5": "$-",
+                "SGC 10": "$-",
+                "CGC 10": "$-",
+                "PSA 10": "$-",
+                "BGS 10": "$-",
+                "BGS 10 Black": "$-",
+                "CGC 10 Pristine": "$-"
+            }
+
+            card_rarity = card.get("rarity", "No Rarity")
+            if card_rarity == "No Rarity":
+                watchlist.append(card["id"])
             card_object = {
                 "name": card["name"],
                 "number": card["number"],
-                "price": card_price,
-                "rarity": card.get("rarity", "No Rarity")
+                "price": card_price if card_price != {} else cardprice_default,
+                "rarity": card_rarity
             }
-            if card.get("rarity", "No Rarity") not in set_card_data:
-                set_card_data[card["rarity"]] = {}
-            set_card_data[card.get("rarity", "No Rarity")][card["name"]] = card_object
+            if card_rarity not in set_card_data:
+                set_card_data[card_rarity] = {}
+            set_card_data[card_rarity][card["name"]] = card_object
+        print("watchlist: ", watchlist)
         await prices_db.update_one({"name": set_name}, {"$set": {"cardPrices": set_card_data}})
-        return "Success"
-    except:
-        print("Error")
+        return {
+            "watchlist": watchlist,
+        }
+    except Exception as e:
+        exception_type = type(e).__name__
+        print(f"An error occurred in import_set_card_prices: {exception_type} {e}")
         return "error"
 
 '''
@@ -419,35 +508,168 @@ async def updateVarients(setname: str):
     print("updating varients for set: " + setname)
     cards_db.update_many({"set": setname}, {"$set": {"varients": []}})
 
-'''
-async def resetRarityFor151():
-    # Fetch the card document from the database
-        card = await cards_db.find_one({"set": "151", "number": cardNumber})
-        print(card)
-        if card:
-            print("Card found")
-            # Extract the card ID
-            card_id = card["id"]
-            
-            # Fetch the rarity from the external API
-            apiCard = Card.find(card_id)
-            new_rarity = apiCard.rarity
-            print("updating now with new rarity: " + str(new_rarity))
-            # Update the rarity in the database
+
+async def fix_limited_retrival_set_list_bug():
+    query = {
+        "$or": [
+            {"total": {"$gt": 300}},
+            {"name": "Journey Together"}
+        ]
+    }
+
+    results = await cardsets_db.find(query).to_list(length=None)
+    
+    # Properly serialize ObjectId fields before returning
+    serialized_results = []
+    for result in results:
+        # Convert ObjectId to string
+        result["_id"] = str(result["_id"])
+        serialized_results.append(result)
+    
+    print("Results:")
+    for result in serialized_results:
+        print(result)
+    second_results = []
+    empty_prices_query = {
+        "$or": [
+            {"cardPrices": {}},  # Empty object
+            {"cardPrices": {"$exists": False}},  # Field doesn't exist
+            {"cardPrices": {"$size": 0}}  # Empty array (if it's an array)
+        ]
+    }
+    empty_prices_results = await prices_db.find(empty_prices_query).to_list(length=None)
+    # Serialize these results too
+    empty_prices_serialized = []
+    for result in empty_prices_results:
+        # Convert ObjectId to string
+        result["_id"] = str(result["_id"])
+        empty_prices_serialized.append(result)
+    
+    print("\nSets with empty cardPrices:")
+    for result in empty_prices_serialized:
+        print(f"Set: {result.get('name')}")
+    
+    # For each set that is large, insert the varients for the documents then fetch price
+    for result in serialized_results:
+        set_name = result.get("name")
+        print(f"Processing set: {set_name}")
+        # Fetch the cards in the set
+        cards = await get_cardset_cards(set_name)
+        for card in cards:
+            card_id = card.get("id")
+            # Check if the card has a varient
+            if "varients" in card and len(card["varients"]) > 0:
+                print(f"Card {card_id} already has varients, skipping.")
+                continue
+            else:
+                await cards_db.update_one(
+                    {"id": card_id},
+                    {"$set": {"varients": []}}
+                ) 
+        print("Fetching prices for set...")
+        result = await import_set_card_prices(set_name)
+        
+    # For each set that has no prices, fetch the prices
+    for result in empty_prices_serialized:
+        set_name = result.get("name")
+        print(f"Processing set: {set_name}")
+        cards = await get_cardset_cards(set_name)
+        for card in cards:
+            card_id = card.get("id")
+            # Check if the card has a varient
+            if "varients" in card and len(card["varients"]) > 0:
+                print(f"Card {card_id} already has varients, skipping.")
+                continue
+            else:
+                await cards_db.update_one(
+                    {"id": card_id},
+                    {"$set": {"varients": []}}
+                )
+
+        print("Fetching prices for set...")
+        result = await import_set_card_prices(set_name)
+    return result
+
+
+
+async def fix_keyerrors_cards():
+    cards = await cards_db.find({
+    "$or": [
+        {"rarity": {"$exists": False}},  # rarity field doesn't exist
+        {"rarity": None},                # rarity field is null
+        {"rarity": ""}                   # rarity field is empty string
+    ]
+    }).to_list(length=None)
+    return {
+        "fixed_cards": [serialize_document(card) for card in cards]
+    }
+
+async def importNoRarityCards():
+    # Fetch all cards with no rarity
+    no_rarity_cards = await cards_db.find({"rarity": "No Rarity"}).to_list(length=None)
+    
+    # Process each card
+    for card in no_rarity_cards:
+        card_name = card.get("name")
+        card_number = card.get("number")
+        set_name = card.get("set")
+        
+        # Fetch the price data for the card
+        price_data = await get_price_charting_data(set_name, set_name, card_name, card_number)
+        
+        # Update the card with the fetched price data
+        if price_data:
             await cards_db.update_one(
-                {"id": card_id},
-                {"$set": {"rarity": new_rarity}}
+                {"_id": card["_id"]},
+                {"$set": {"price": price_data}}
             )
-            
-            print("Success")
-        else:
-            return "Card not found"
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return "Failed"
-'''
+    
+    return "No Rarity cards updated successfully."
 
 
+async def fix_limited_retrival_set_list_bug2():
+    query = {
+        "$or": [
+            {"total": {"$gt": 300}},
+            {"name": "Journey Together"}
+        ]
+    }
+
+    results = await cardsets_db.find(query).to_list(length=None)
+    
+    # Properly serialize ObjectId fields before returning
+    serialized_results = []
+    for result in results:
+        # Convert ObjectId to string
+        result["_id"] = str(result["_id"])
+        serialized_results.append(result)
+    
+    print("Results:")
+    for result in serialized_results:
+        print(result)
+    empty_prices_query = {
+        "$or": [
+            {"cardPrices": {}},  # Empty object
+            {"cardPrices": {"$exists": False}},  # Field doesn't exist
+            {"cardPrices": {"$size": 0}}  # Empty array (if it's an array)
+        ]
+    }
+    empty_prices_results = await prices_db.find(empty_prices_query).to_list(length=None)
+    # Serialize these results too
+    empty_prices_serialized = []
+    for result in empty_prices_results:
+        # Convert ObjectId to string
+        result["_id"] = str(result["_id"])
+        empty_prices_serialized.append(result)
+    
+    print("\nSets with empty cardPrices:")
+    for result in empty_prices_serialized:
+        print(f"Set: {result.get('name')}")
+    
+    return {
+        "large Sets": serialized_results,
+        "empty prices": empty_prices_serialized
+    }
 
 def fix_products_db(set_name):
 
@@ -464,23 +686,3 @@ def fix_products_db(set_name):
     result = products_db.insert_one(document)
     print(f"Inserted document")
     return "meow"
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python script.py <set_name>")
-        sys.exit(1)
-    
-    set_name = sys.argv[1]
-    update_or_insert_set(set_name)
-
-async def insertTracker(set_name: str):
-    tracker_db.insert_one({"set": set_name})
-    print(f"Inserted document")
-    return "meow"
-
-async def getTrackers():
-    cursor = tracker_db.find({})
-    output = []
-    async for doc in cursor:
-        output.append(doc["set"])
-    return output

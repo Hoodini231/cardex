@@ -55,7 +55,7 @@ export function PokemonCardGrid({
   const [page, setPage] = useState(1); // Initialize page state
   const [totalPages, setTotalPages] = useState(0); // Initialize total pages state
 
-  const pageSize = 60;
+  const pageSize = 42;
 
  // Updated useQuery to include all filter params in the queryKey
   const { data, isLoading, error, refetch } = useQuery({

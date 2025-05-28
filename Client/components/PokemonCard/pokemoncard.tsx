@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import CardDetailDialog from "./cardDetailDialog";
-import { Heart } from "lucide-react"; 
+ import { Heart } from "lucide-react"; 
 
 function PokemonCard({ card, onToggleChase, priceData }: { card: any; onToggleChase: () => void; priceData: any }) {
     const EMPTY_PRICES = {
@@ -73,8 +73,8 @@ function PokemonCard({ card, onToggleChase, priceData }: { card: any; onToggleCh
                 </div>
               </div>
               <div className="p-3">
-                <h3 className="font-medium text-sm truncate">{card.name}</h3>
-                <p className="text-xs text-muted-foreground truncate">{card.set} #{card.number}</p>
+                <h3 className="font-medium text-sm break-words">{card.name}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{card.set} #{card.number}</p>
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-primary font-bold">
                     {priceData["Ungraded"] || EMPTY_PRICES["Ungraded"]}

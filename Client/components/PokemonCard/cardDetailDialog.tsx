@@ -14,11 +14,11 @@ function CardDetailDialog({ card, onToggleChase, cardPrice }: { card: any; onTog
     };
   
     return (
-      <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden">
+      <DialogContent className="max-w-[400px] md:max-w-[850px] p-0 overflow-hidden">
         <div className="grid md:grid-cols-2 gap-0">
           <div className="bg-gray-100 p-8 flex items-center justify-center relative">
-            <div className="relative aspect-[3/4] w-full max-w-[280px]">
-              <Image src={card.imageSmall || "/placeholder.png"} alt={card.name} fill className="object-contain" />
+            <div className="relative aspect-[3/4] w-[300px] md:w-full max-w-[400px]">
+              <Image src={card.imageLarge || "/placeholder.png"} alt={card.name} fill className="object-fill" />
   
               {/* Chase Banner in Detail View */}
               {card.chase && (
@@ -42,8 +42,8 @@ function CardDetailDialog({ card, onToggleChase, cardPrice }: { card: any; onTog
           <div className="p-8">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-2xl font-bold">{card.name} #{card.number}</h2>
-                <p className="text-sm text-muted-foreground">{card.set}</p>
+                <h2 className="text-2xl font-bold">{card.name}</h2>
+                <p className="text-sm text-muted-foreground">{card.set} #{card.number}</p>
               </div>
             </div>
   
