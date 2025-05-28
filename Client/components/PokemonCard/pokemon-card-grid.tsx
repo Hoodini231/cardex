@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import PokemonCard from "./pokemoncard";
+import PokeballSpinner from "../ui/pokeballSpinner";
 import { useQuery } from "@tanstack/react-query";
 
 interface priceData {
@@ -54,99 +55,119 @@ export function PokemonCardGrid({
   const [page, setPage] = useState(1); // Initialize page state
   const [totalPages, setTotalPages] = useState(0); // Initialize total pages state
 
-  const pageSize = 40;
+  const pageSize = 42;
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["set_name", chosenSet, page],
+ // Updated useQuery to include all filter params in the queryKey
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [
+      "set_name", 
+      chosenSet, 
+      page, 
+      pageSize, 
+      filterOptions.rarity, 
+      sortBy
+    ],
     queryFn: async () => {
       if (!chosenSet) return { data: [], total: 0 };
-  
+    
+      // Build params inside the queryFn
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+      });
+
+      if (filterOptions.rarity) {
+        params.append("rarity", filterOptions.rarity);
+      }
+
+      if (sortBy) {
+        const [field, direction] = sortBy.split("-");
+        params.append("sort_by", field);
+        params.append("sort_order", direction === 'desc' ? '-1' : '1');
+      }
+      
+      // Use the params in the fetch URL
       const res = await fetch(
-        `http://127.0.0.1:8000/get/render/collections/${chosenSet}?page=${page}&page_size=${pageSize}`
+        `http://127.0.0.1:8000/get/render/collections/${chosenSet}?${params.toString()}`
       );
-      return await res.json(); // expects { data, total }
+      
+      if (!res.ok) {
+        throw new Error(`Error ${res.status}: ${res.statusText}`);
+      }
+      
+      const result = await res.json();
+      return result;
     },
     enabled: !!chosenSet,
-    staleTime: 1000 * 60 * 15, //  15 min
+    staleTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,
   });
 
-
-  function priceCompare(a: PriceWrapper, b: PriceWrapper) {
-    return a.price["Ungraded"] < b.price["Ungraded"] ? -1 : 1;
-  }
-
-
-  // Use the fetched data or fallback to an empty array
+  // Effect to update cards state when data changes
   useEffect(() => {
-    let result: CardSet[] = data ? [...data.data] : [];
-    if (searchQuery) {
-      result = result.filter((card) =>
-        card.name.toLowerCase().startsWith(searchQuery.toLowerCase())
-      );
+    if (data) {
+      setCards(data.data || []);
+      setTotalPages(Math.ceil(data.total / pageSize));
     }
+  }, [data, pageSize]);
 
-    if (filterOptions.rarity) {
-      result = result.filter((card) => card.rarity === filterOptions.rarity);
+  // Effect to handle filter changes - reset to page 1 and refetch
+  useEffect(() => {
+    // Reset to page 1 when filters change
+    setPage(1);
+    
+    // If chosenSet exists, refetch data with new params
+    if (chosenSet) {
+      refetch();
     }
-    if (filterOptions.showOnlyChase) {
-      result = result.filter((card) => card.chase);
-    }
-
-    if (sortBy) {
-      result.sort((a, b) => {
-        switch (sortBy) {
-          case "name-asc":
-            return a.name.localeCompare(b.name);
-          case "name-desc":
-            return b.name.localeCompare(a.name);
-          case "rarity-asc":
-            return a.rarity.localeCompare(b.rarity);
-          case "rarity-desc":
-            return b.rarity.localeCompare(a.rarity);
-          case "chase":
-            return (b.chase ? 1 : 0) - (a.chase ? 1 : 0);
-          case "price-asc":
-            return priceCompare(a.price, b.price);
-          case "price-desc":
-            return priceCompare(b.price, a.price);
-          default:
-            return 0;
-        }
-      });
-    }
-    setFilteredCards(result);
-    setTotalPages(Math.ceil(result.length / pageSize)); // Update total pages based on filtered results
-  }, [data, searchQuery, sortBy, filterOptions]);
+  }, [searchQuery, sortBy, filterOptions, chosenSet, refetch]);
 
   const toggleChase = (id: number) => {
     setCards(cards.map((card) => (card.id === id ? { ...card, chase: !card.chase } : card)));
   };
 
   // Always call hooks in the same order, and conditionally render content in the returned JSX.
-  return (
-    <div>
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p>Error loading data.</p>
-      ) : (
-        <>
-          {data.data.map((card, index) => (
-            <div key={index}>{/* render card here */}</div>
+return (
+  <div>
+    {isLoading ? (
+      <div className="flex py-8 justify-center items-center">
+        <PokeballSpinner size="large" showText={true} />
+      </div>
+    ) : error ? (
+      <p>Error loading data.</p>
+    ) : (
+      <>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4">
+          {cards.map((card: any) => (
+            <PokemonCard
+              key={card.id}
+              card={card}
+              onToggleChase={() => toggleChase(card.id)}
+              priceData={card.price.price}
+            />
           ))}
-  
-          <div className="pagination-controls">
-            <button onClick={() => setPage(p => Math.max(p - 1, 1))} disabled={page === 1}>
-              Previous
-            </button>
-            <span>Page {page} of {totalPages}</span>
-            <button onClick={() => setPage(p => Math.min(p + 1, totalPages))} disabled={page === totalPages}>
-              Next
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+        </div>
+
+        <div className="flex justify-center items-center gap-4 mt-6">
+          <button
+            onClick={() => setPage(p => Math.max(p - 1, 1))}
+            disabled={page === 1}
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-sm text-gray-700">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </>
+    )}
+  </div>
+  )};
