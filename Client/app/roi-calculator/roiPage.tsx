@@ -1,11 +1,11 @@
 "use client";
-
 import { useState } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { NavBar } from "../../components/nav-bar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { SetList } from "./set-list";
 import { ROICalculator } from "./calculator";
+import React from "react";
 
 
 interface CardSet {

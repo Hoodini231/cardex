@@ -40,15 +40,17 @@ export function NavBar({ onSearch }: { onSearch?: (query: string) => void }) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <NavLink href="/" label="Home" icon={<Home className="h-4 w-4 mr-1" />} />
-            <NavLink href="/collections" label="Collections" icon={<LayoutDashboard className="h-4 w-4 mr-1" />} />
-            <NavLink href="/roi-calculator" label="ROI" icon={<User className="h-4 w-4 mr-1" />} />
-            <NavLink href="/my-collection" label="My Collection" icon={<User className="h-4 w-4 mr-1" />} />
-            <NavLink href="/market-watch" label="Market Watch" icon={<BarChart2 className="h-4 w-4 mr-1" />} />
-            <NavLink href="/wishlist" label="WishList" icon={<Heart className="h-4 w-4 mr-1" />} />
-            <a href="http://3.27.248.98:8501/" className="text-white hover:text-blue-200 transition-colors">
-              Collection Assistant
-            </a>
+            <NavLink href="/" label="Home"/>
+            <NavLink href="/collections" label="Collections"/>
+            <NavLink href="/roi-calculator" label="ROI" />
+            <NavLink href="/market-watch" label="Market Watch"/>
+            <NavLink href="/wishlist" label="WishList"/>
+            <Button variant="outline" size="sm">
+              <a href="http://3.27.248.98:8501/" className="text-black hover:text-blue-400 transition-colors">
+                Collection Assistant
+              </a>
+            </Button>
+            
 
             <Button
               variant="ghost"
@@ -95,12 +97,12 @@ export function NavBar({ onSearch }: { onSearch?: (query: string) => void }) {
         {isOpen && (
           <div className="md:hidden pb-4 border-t border-blue-500 pt-3">
             <div className="flex flex-col space-y-3">
-              <MobileNavLink href="/" label="Home" icon={<Home className="h-4 w-4 mr-2" />} />
-              <MobileNavLink href="/collections" label="Collections" icon={<LayoutDashboard className="h-4 w-4 mr-2" />} />
-              <MobileNavLink href="/roi-calculator" label="ROI Calculator" icon={<User className="h-4 w-4 mr-2" />} />
-              <MobileNavLink href="/my-collection" label="My Collection" icon={<User className="h-4 w-4 mr-2" />} />
-              <MobileNavLink href="/market-watch" label="Market Watch" icon={<BarChart2 className="h-4 w-4 mr-2" />} />
-              <MobileNavLink href="/wishlist" label="WishList" icon={<Heart className="h-4 w-4 mr-2" />} />
+              <MobileNavLink href="/" label="Home" />
+              <MobileNavLink href="/collections" label="Collections" />
+              <MobileNavLink href="/roi-calculator" label="ROI Calculator" />
+              <MobileNavLink href="/my-collection" label="My Collection" />
+              <MobileNavLink href="/market-watch" label="Market Watch" />
+              <MobileNavLink href="/wishlist" label="WishList" />
               <a href="http://3.27.248.98:8501/" className="text-white hover:text-blue-200 transition-colors">
               Collection Assistant
             </a>
@@ -112,19 +114,17 @@ export function NavBar({ onSearch }: { onSearch?: (query: string) => void }) {
   )
 }
 
-function NavLink({ href, label, icon }: { href: string; label: string; icon: React.ReactNode }) {
+function NavLink({ href, label }: { href: string; label: string;}) {
   return (
-    <Link href={href} className="text-white hover:text-blue-200 transition-colors font-medium flex items-center">
-      {icon}
+    <Link href={href} className="text-white hover:text-blue-200 transition-colors font-small lg:text-[18px] flex items-center">
       {label}
     </Link>
   )
 }
 
-function MobileNavLink({ href, label, icon }: { href: string; label: string; icon: React.ReactNode }) {
+function MobileNavLink({ href, label }: { href: string; label: string; }) {
   return (
     <Link href={href} className="text-white hover:text-blue-200 transition-colors py-2 font-medium flex items-center">
-      {icon}
       {label}
     </Link>
   )
