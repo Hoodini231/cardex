@@ -1,13 +1,13 @@
 # [In-progress] CardeDex - Centralized Pokemon TCG collecting platform
 
 PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's. The platform integrates organizing portfolios, warehouse for pokemon card data, price monitoring, data analytics, and AI-driven insights** to increase user agency and decision-making.
-<img width="1508" alt="cardex homepage" src="https://github.com/user-attachments/assets/4c8bf4e6-0378-4be9-aff0-e45375b59538" />
+<img width="1693" height="1197" alt="homepage" src="https://github.com/user-attachments/assets/f36975c5-79ba-428e-9df6-a5f69c07e0e3" />
 
 
 
 
 
-### 🔗 [Expected launch - July 31th 2025]
+### 🔗 [Expected launch - ???]
 
 ---
 
@@ -68,10 +68,10 @@ PokeCardeDex is a one-stop **web application** built for Pokemon TCG collector's
 ## Visual Captures
 
 ### Collections page
-<img width="1233" alt="Cardex collections" src="https://github.com/user-attachments/assets/746b2a2f-5af5-4c7d-8947-24b42e5f4ce1" />
+<img width="1560" height="1260" alt="collection page" src="https://github.com/user-attachments/assets/f5e2c694-78fe-4b2c-910b-b27854ed4e57" />
 
 ### Card detail pop up
-<img width="517" alt="Cardex pop up page" src="https://github.com/user-attachments/assets/806e6eae-ef46-4c81-848e-88084898b04a" />
+<img width="1026" height="706" alt="Updated card Popup" src="https://github.com/user-attachments/assets/d1cb17b3-71d7-4184-9952-dda87a435172" />
 
 ### ROI set page
 <img width="1177" alt="Cardex ROI sets" src="https://github.com/user-attachments/assets/d7838472-a3d0-4f4b-8a7c-c9f0a90d4a45" />
